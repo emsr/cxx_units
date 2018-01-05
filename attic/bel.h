@@ -406,7 +406,7 @@
   }
 
 
-//#include "bel.tcc"
+#include "bel.tcc"
 
 
 #endif // _LEVEL_H
