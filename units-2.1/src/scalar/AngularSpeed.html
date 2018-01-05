@@ -1,0 +1,126 @@
+<!--
+#
+# $Id: AngularSpeed.html,v 1.1.1.1 2001-03-08 17:08:52 knicewar Exp $
+#
+# Copyright Keith Nicewarner.  All rights reserved.
+#
+-->
+
+<html>
+<head>
+<title>Class ConOps For AngularSpeed</title>
+</head>
+
+<body>
+<h1>AngularSpeed Class</h1>
+
+
+<h3>Terminology</h3>
+
+<p>None.
+</p>
+
+<h3>ConOps</h3>
+
+<p>Represent the abstract concept of angular speed, which is the rate of
+change of an angle.  The internal representation of the units is hidden from 
+the user.  Functions include comparison, arithmetic, interaction, and 
+trigonometric 
+operators.  Methods provided when necessary to interact with related classes.
+Functions provided to read and
+write an angularspeed object in binary format.  A function providing a self-test is provided.
+</p>
+
+<p>Interfaces with this class are shown at the Unit Library Service level.
+</p>
+
+<h3>Implementation Details</h3>
+
+<p>AngularSpeed is one class in a set of classes providing basic unit objects 
+needed for a variety of applications.  
+</p>
+
+<h3>Object Scenarios / Test Procedures</h3>
+
+<p>An object of AngularSpeed can be declared without a value.  When a value is
+assigned to that object, it must be defined in terms of a Angle subclass and
+a Time subclass.  When an object of a AngularSpeed class is declared and is 
+given a value, that value must also be specified in terms of a Angle subclass 
+and a Time subclass.  This is the only way that the AngularSpeed class can 
+know how the value provided should be interpreted.
+</p>
+
+<p>A function is provided to convert a AngularSpeed object to a double.  This 
+also requires a subclass specification so the caller can be assured of getting 
+the result in an expected way that is not dependent on the internal
+representation.
+</p>
+
+<p>To test this class, simply run the unitsTest.exe program by typing 
+"unitsTest AngularSpeed".  The test routine will indicate if the class passed
+it's self-test.
+</p>
+
+<h4>Example Code Snippet</h4>
+
+<code><pre>
+      Angle changeHeading (const Angle & currentHeading,
+                           const Time  & duration)
+      {
+        // for example purposes, declare a constant rate of heading change
+        AngularSpeed headingChangeRate = DegreesAngle(2.3)/SecondsTime(1.0);
+
+        Angle newHeading = currentHeading + headingChangeRate*duration;
+
+        return newHeading;
+      }
+</pre></code>
+
+<h3>Requirements</h3>
+
+<p>Provide comparison operators, as appropriate, to compare to objects of 
+this class.
+</p>
+ 
+<p>Provide arithmetic operators, as appropriate, to add, subtract, multiply, 
+and divide objects of this class.
+</p>
+ 
+<p>Provide operators to interact appropriately with the Time class, the 
+Angle class, and doubles.
+</p>
+
+<p>Provide a way to print the value of an object.
+</p>
+
+<p>Provide binary read and write functions.
+</p>
+
+<h3>System Dependencies</h3>
+
+<p>Required classes include:
+</p>
+
+<ul>
+<li><a href="./Unit.html">Unit</a>
+    <ul>
+    <li>This class inherits from the Unit class.
+   </ul>
+<li><a href="./Time.html">Time</a>
+    <ul>
+    <li>Time is used in AngularSpeed operators.
+   </ul>
+<li><a href="./Angle.html">Angle</a>
+    <ul>
+    <li>Angle is used in AngularSpeed operators.
+   </ul>
+</ul>
+
+<h3>Issues</h3>
+
+<p>None.
+</p>
+
+
+</body>
+</html>

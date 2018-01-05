@@ -1,0 +1,125 @@
+<!--
+#
+# $Id: Volume.html,v 1.1.1.1 2001-03-08 17:08:53 knicewar Exp $
+#
+# Copyright Keith Nicewarner.  All rights reserved.
+#
+-->
+
+<html>
+<head>
+<title>Class ConOps For Volume</title>
+</head>
+
+<body>
+<h1>Volume Class</h1>
+
+
+<h3>Terminology</h3>
+
+<p>None.
+</p>
+
+<h3>ConOps</h3>
+
+<p>Represent the abstract concept of a volume.  Functions include comparison,
+arithmetic, and interaction operators.  Methods provided when necessary to 
+interact with related classes.  Functions provided to read and
+write an Volume object in binary format.  A function providing a self-test is provided.
+A set of common subclasses are provided.
+</p>
+
+<p>Interfaces with this class are shown at the Unit Library Service level.
+</p>
+
+<h3>Implementation Details</h3>
+
+<p>Volume is one class in a set of classes providing basic unit objects 
+needed for a variety of applications.  
+</p>
+
+<p>Subclasses defined for convenience are MetersVolume, LitersVolume,
+USGallonsVolume, BIGallonsVolume.
+</p>
+
+<h3>Object Scenarios / Test Procedures</h3>
+
+<p>An object of Volume can be declared without a value.  When a value is
+assigned to that object, it must be defined in terms of a Length subclass.  
+When an object of a Volume class is declared and is given a 
+value, that value must also be specified in terms of a Length subclass.  
+This is the only way that the Volume class can know how the 
+value provided should be interpreted.
+</p>
+
+<p>A function is provided to convert a Volume object to a double.  This 
+requires a Length subclass specification so the caller can be assured of 
+getting the result in an expected way that is not dependent on the internal 
+representation.
+</p>
+
+<p>To test this class, simply run the unitsTest.exe program by typing 
+"unitsTest Volume".  The test routine will indicate if the class passed
+it's self-test.
+</p>
+
+<h4>Example Code Snippet</h4>
+
+<code><pre>
+      Volume volume1 = (MetersLength(1.0)*MetersLength(1.0)*MetersLength(1.0);
+      Volume volume2 = (FeetLength(1.0)*FeetLength(1.0)*FeetLength(1.0);
+
+      if (volume1 < volume 2)
+      {
+        // There is something really wrong.  Tell the user.
+      }
+</pre></code>
+
+<h3>Requirements</h3>
+
+<p>Provide comparison operators, as appropriate, to compare to objects of
+this class.
+</p>
+ 
+<p>Provide arithmetic operators, as appropriate, to add, subtract, multiply,
+and divide objects of this class.
+</p>
+ 
+<p>Provide operators to interact appropriately with the Length class, the
+Area class, and doubles.
+</p>
+
+<p>Provide a way to print the value of an object.
+</p>
+
+<p>Provide binary read and write functions.
+</p>
+
+<h3>System Dependencies</h3>
+
+<p>Required classes include:
+</p>
+
+<ul>
+<li><a href="./Unit.html">Unit</a>
+    <ul>
+    <li>This class inherits from the Unit class.
+   </ul>
+<li><a href="./Length.html">Length</a>
+    <ul>
+    <li>Length is used in Volume operators.
+   </ul>
+<li><a href="./Area.html">Area</a>
+    <ul>
+    <li>Area is used in Volume operators.
+   </ul>
+</ul>
+
+<h3>Issues</h3>
+
+<p>None.
+</p>
+
+
+</body>
+</html>

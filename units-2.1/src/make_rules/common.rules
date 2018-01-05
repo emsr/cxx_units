@@ -1,0 +1,146 @@
+#
+# $Id: common.rules,v 1.7.4.4 2008-06-17 19:55:44 knicewar Exp $
+#
+# Copyright Keith Nicewarner.  All rights reserved.
+#
+# Common variables and rules for all Makefiles.
+#
+# The following variables must be defined before including this:
+#   TARGETS: all binaries or libraries to be built
+#   SOURCE:  all source files (for auto dependencies)
+#   SUBDIRS: all subdirectories to recursively build
+#
+# The following are optional:
+#   TARGETS            - all binaries or libraries to be built (add to it)
+#   INSTALL_DIR        - where to install include, bin, lib, etc. dirs
+#   INSTALL_LIBRARIES  - things to publish/install to the lib dir
+#   INSTALL_BINARIES   - things to publish/install to the bin dir
+#   INSTALL_HEADER_DIR - subdir(path) under the include dir
+#   INSTALL_HEADERS    - things to publish/install under the include dir
+#   INSTALL_DATA       - things to publish/install under the etc dir
+#   INSTALL_HTML       - things to publish/install under the html dir
+#   PLATFORM           - specify a different name for the OS/compiler dir
+#
+
+ifeq ($(insure), 1)
+MEM_DEBUGGER = insure
+endif
+
+ifeq ($(sun), 1)
+  CC  = cc
+  CXX = CC
+  COMPILER_TYPE    = Sun
+  COMPILER_VERSION := $(shell CC -V 2>&1 | awk '{print $$4}')
+  CFLAGS = +w
+  ifeq ($(optimize), 1)
+#    CFLAGS += -xO2
+  endif
+  PIC_FLAG = -KPIC
+else
+  ifdef GNU_ARCH
+	GNU_PREFIX = $(GNU_ARCH)-
+  endif
+
+  CC        = $(MEM_DEBUGGER) $(GNU_PREFIX)gcc
+  CXX       = $(MEM_DEBUGGER) $(GNU_PREFIX)g++
+
+
+  CFLAGS    = -W -Wall -Wno-unused -pipe
+
+  #
+  # For dependency file generation.
+  #
+  ifneq ($(COMPILER_VERSION), 2.95)
+    CFLAGS += -MMD -MG
+  endif
+
+  ifneq ($(debug), 0)
+    CFLAGS += -g
+  endif
+
+  ifeq ($(optimize), 1)
+    CFLAGS += -O2
+  endif
+endif
+
+CXXFLAGS  = $(CFLAGS)
+
+
+WORKDIR = .work
+
+
+ifeq ($(iostream), 0)
+CPPFLAGS  = -DUNITS_NO_IOSTREAM_OPERATORS
+endif
+
+
+
+all:: all.local $(addsuffix .all, $(SUBDIRS))
+
+all.local: $(WORKDIR) $(TARGETS) publish.local
+
+
+include $(UNITS_ROOT)/make_rules/install.rules
+include $(UNITS_ROOT)/make_rules/publish.rules
+
+
+
+$(WORKDIR)/%.o: %.cpp
+	$(COMPILE.cc) -o $@ $<
+
+$(WORKDIR)/%.so: %.cpp
+	$(COMPILE.cc) -fPIC -o $@ $<
+
+$(WORKDIR)/%: %.cpp
+	$(LINK.cc) $< $(LDLIBS) -o $@
+
+.PRECIOUS: $(WORKDIR)/%.so $(WORKDIR)/%.o
+
+
+
+$(WORKDIR):
+	mkdir -p $@
+
+
+%.all:
+	$(MAKE) -C $* $(MAKEOPTS)
+
+
+%.install:
+	$(MAKE) -C $* $(MAKEOPTS) install
+
+
+%.publish:
+	$(MAKE) -C $* $(MAKEOPTS) publish
+
+
+%.clean:
+	$(MAKE) -C $* $(MAKEOPTS) clean
+
+%.depclean:
+	$(MAKE) -C $* $(MAKEOPTS) depclean
+
+
+ifdef SOURCE
+ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(MAKECMDGOALS),depclean)
+SOURCE_CPP = $(filter %.cpp, $(SOURCE))
+
+ifneq ($(SOURCE_CPP),)
+-include $(addprefix $(WORKDIR)/, $(SOURCE_CPP:.cpp=.d))
+endif
+endif
+endif
+endif
+
+
+clean.local::
+	rm -rf $(WORKDIR)
+
+clean:: clean.local $(addsuffix .clean, $(SUBDIRS))
+
+
+depclean.local::
+	rm -f $(WORKDIR)/*.d
+
+depclean:: depclean.local $(addsuffix .depclean, $(SUBDIRS))

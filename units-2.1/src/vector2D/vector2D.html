@@ -1,0 +1,364 @@
+<!--
+#
+# $Id: vector2D.html,v 1.1 2001-03-12 03:31:58 knicewar Exp $
+#
+# Copyright Keith Nicewarner.  All rights reserved.
+#
+-->
+
+<html>
+<head>
+<title>User Guide for units::vector2D Class Library</title>
+</head>
+
+<body>
+<h1>User Guide for <a href="../units.html">units</a>::vector2D Class Library</h1>
+
+
+<h2>Introduction</h2>
+
+<p>
+This class library builds on the 
+<a href="../../scalar/src/scalar.html">scalar</a> classes.
+It extends some of the scalar units of measure into 2 dimensions.
+A 2D vector in this library has an x and y component in cartesian space.  
+No reference frame is assumed for the vector.  The application 
+is responsible for determining the reference frame, context,
+and validity of any vector.
+</p>
+
+
+<br>
+<h2>Construction</h2>
+
+<h3><a href="Vector2D.h">Vector2D</a></h3>
+
+<p>
+The most basic 2D vector class is the Vector2D template class.  This
+gives the full set of 2D vector operations and ignores the type of
+the template argument, as long as it has arithmetic operators defined.
+For example:
+<code><pre>
+      Vector2D< int >    ivec(1, 2);
+      Vector2D< double > dvec(1.2, 3.4);
+      Vector2D< char >   cvec('a', 'b');  // strange but legal
+</pre></code>
+The components can be accessed or changed using the public data 
+members <code>x</code> and <code>y</code>:
+<code><pre>
+      dvec.x = 2.1;
+      dvec.y = 2 * dvec.x;
+</pre></code>
+</p>
+
+<p>
+A Vector2D does not have explicit units associated with it and is
+therefore as dangerous as using a <code>double</code> with implicit
+units.  The Vector2D template class was provided as a convenience for
+low-level vector algebra applications.
+</p>
+
+<h3><a href="Unit2D.h">Unit2D</a></h3>
+
+<p>
+To construct a 2D vector with units associated with it, use the Unit2D 
+template class.  For example:
+<code><pre>
+      Unit2D< Length > lvec(MetersLength(1), MetersLength(2));
+      Unit2D< Speed >  svec(KnotsSpeed(100), KnotsSpeed(200));
+</pre></code>
+The components can be accessed or changed using the public 
+member <b>functions</b> <code>x()</code> and <code>y()</code>:
+<code><pre>
+      lvec.x() = MetersLength(2.1);
+      lvec.y() = 2 * lvec.x();
+</pre></code>
+</p>
+
+
+<br>
+<h2>Comparison</h2>
+
+<p>
+Testing for equality can be done in two ways: binary and similar.
+Binary equality is the same as testing <code>double == double</code>.
+This is potentially dangerous because it compares the binary images
+of the two numbers, not their values.  The slightest variation can
+lead to an inequality.  It's up to the application to decide if this
+is the desired behavior.
+</p>
+
+<p>
+More often, the application will wish to test if two vectors are
+"close enough" to each other.  This can be done with the 
+<code>similar</code> function provided with all vector template classes.
+The default tolerance for the <code>Unit2D</code> template class is the 
+default tolerance for the base unit (the template argument).  There is no
+default tolerance for the <code>Vector2D</code> template class; the 
+application must always provide a tolerance.  The tolerance is used
+to test if one vector is within a square around the other vector.
+The side of the square is 2 times the tolerance.
+</p>
+
+
+<br>
+<h2>Arithmetic</h2>
+
+<p>
+Once constructed, a 2D vector can be manipulated using linear algebra
+operators.  The application developer should look at 
+<a href="Vector2D.h">Vector2D.h</a> or
+<a href="Unit2D.h">Unit2D.h</a>
+to see the full list of valid operators.  Some examples are:
+<code><pre>
+      Unit2D< Length > a(MetersLength(1), MetersLength(2));
+
+      Unit2D< Length > b = 2 * a / 3.4;
+
+      b += a;
+
+      Unit2D< Length > c = (a - 3 * b);
+</pre></code>
+</p>
+
+<p>
+The <code>Vector2D</code> and <code>Unit2D</code> template classes
+share all arithmetic operators, with the exception that <code>Unit2D</code>
+does not have a public dot product or cross product operator because the units
+for these products are squared.  Since <code>Vector2D</code> has no units,
+the products are available:
+<code><pre>
+      Vector2D< double > a(1.1, 2.2);
+      Vector2D< double > b(2.2, 1.1);
+
+      double dot   = a * b;  // dot product
+      double cross = a % b;  // cross product
+</pre></code>
+Remember that in 2D, the cross product is a scalar; in 3D, it's
+a vector.
+</p>
+
+
+<br>
+<h2>Functions</h2>
+
+<p>
+The application developer should look at
+<a href="Vector2D.h">Vector2D.h</a> or
+<a href="Unit2D.h">Unit2D.h</a>
+to see the full list of valid functions.  The functions
+are shared by both <code>Vector2D</code> and <code>Unit2D</code>
+and are fairly straight forward.  The distance functions may be
+a little counter-intuitive for unit vectors other than 
+<code>Unit2D< Length ></code>, but they represent a mathematically
+useful concept.  For instance:
+<code><pre>
+      Unit2D< Speed > a(KnotsSpeed(20), KnotsSpeed(-20));
+      Unit2D< Speed > b(KnotsSpeed(22), KnotsSpeed(-15));
+
+      Speed c = distance(a, b);
+</pre></code>
+In this case, <code>c</code> can be interpreted as the magnitude of
+the "error" between <code>a</code> and <code>b</code>, with the
+appropriate units.
+</p>
+
+
+<br>
+<h2>Cross-Unit Arithmetic</h2>
+
+<p>
+Some <code>Unit2D</code> classes have arithmetic operators defined so 
+that they can interact with other units.  These interactions are the common
+relationships between units:
+</p>
+
+<center><table>
+<tr><td>Unit2D< Speed >        </td><td> = Unit2D< Length > </td><td> / Time</td></tr>
+<tr><td>Unit2D< Acceleration > </td><td> = Unit2D< Speed >  </td><td> / Time</td></tr>
+<tr><td>Unit2D< Force >        </td><td> = Mass           </td><td> * Unit2D< Acceleration ></td></tr>
+</table></center>
+
+<p>
+These relationships can be rearranged to suit the application.  For 
+instance:
+<code><pre>
+      // Compute velocity.
+      Unit2D< Speed > velocity = Unit2D< Length >(MetersLength(5),
+                                                  MetersLength(7)) / SecondsTime(2);
+
+      // Compute position after a duration.
+      Unit2D< Length > position = velocity * SecondsTime(10); 
+</pre></code>
+Note that there is no operator to divide a vector by another vector.
+If we wanted to compute the time to travel to a position given a
+velocity, we'd have to assume that the velocity is in the same
+direction as the position (unless the application wants to do a
+dynamic simulation):
+<code><pre>
+      // Compute time to travel to a position.
+      Time time = velocity.magnitude() / position.magnitude();
+</pre></code>
+</p>
+
+
+<br>
+<h2>Output Formatting</h2>
+
+<p>
+There are times when the application must present a value to the user.
+Since the user needs to see the value in a particular units, the units
+must be specified by the application.  An ostream formatting template
+class is provided for each 2D unit class.  For example, the following 
+prints <code>"(1.1, 2.2) ft"</code>:
+<code><pre>
+      Unit2D< Length > length(FeetLength(1.1), FeetLength(2.2));
+
+      cout << Length2DFormat< FeetLength >(length) << endl;
+</pre></code>
+</p>
+
+<p>
+For some units which can be printed as combinations of other units,
+the format template classes take more than one argument.  For instance, 
+if we wanted to print a speed in miles per minute, we would use the following:
+<code><pre>
+      Unit2D< Speed > speed(KnotsSpeed(200), KnotsSpeed(-200));
+
+      cout << Speed2DFormat< StatuteMilesLength,
+                             MinutesTime >(speed) << endl;
+</pre></code>
+</p>
+
+
+<br>
+<h2>Unit Conversion</h2>
+
+<p>
+Hopefully, applications won't need to explicitly convert 
+<code>Unit2D</code> vectors between units, but as we saw in the
+<a href="../../scalar/src/scalar.html">scalar</a> library, it can
+sometimes become necessary.  In these circumstances, you can use
+the format template classes, which provide a <code>vector()</code>
+operator:
+<code><pre>
+      const double factor = 1.234;  // N / m
+
+      Unit2D< Length > length(FeetLength(1.1), FeetLength(2.2));
+
+      Vector2D< double > newtons = Length2DFormat< MetersLength >(length).vector();
+
+      Unit2D< Force > force(NewtonsForce(newtons.x),
+                            NewtonsForce(newtons.y));
+</pre></code>
+Note that we <b>could</b> have used
+<code><pre>
+      Unit2D< NewtonsForce > force(newtons.x,
+                                   newtons.y);
+</pre></code>
+But this is dangerous because the compiler will not know how to promote
+a <code>Unit2D< NewtonsForce ></code> to a <code>Unit2D< Force ></code>,
+which may cause problems.  <b>Always use the base unit class for 
+<code>Unit2D</code> instantiations.</b>
+</p>
+
+
+<br>
+<h2><a href="Direction2D.h">Direction2D</a></h2>
+
+<p>
+When talking about a vector, we typically refer to its magnitude and
+direction.  Since the magnitude is a scalar value, it already can be
+represented.  But the direction requires a new class:
+<code>Direction2D</code>.  This is a special kind of vector whose
+magnitude is always 1.  Because of this, you can't scale or add
+directions.  You can, however, negate and use the product operators.
+</p>
+
+<p>
+A <code>Direction2D</code> can be constructed by either using the
+<code>direction()</code> operator, or by giving vector components.
+For example:
+<code><pre>
+      Unit2D< Length > length(FeetLength(1.1), FeetLength(2.2));
+
+      Direction2D length_d = length.direction();
+
+      Direction2D dir(1, 2);
+</pre></code>
+The direction vector is always normalized, so you don't have to worry
+about making sure the components have a magnitude of 1.  A direction
+can be used to construct a unit of measure vector by multiplying
+with a magnitude:
+<code><pre>
+      Unit2D< Length > length = FeetLength(10) * Direction2D(1, 2);
+</pre></code>
+Because a direction can never have a 0 length, an exception will
+be thrown if you ever attempt to directly or indirectly create
+a direction with a magnitude of 0.
+</p>
+
+<p>
+There are only 3 basic functions that can be performed on a direction
+besides the arithmetic operators: <code>angle</code>,
+<code>midpoint</code>, and <code>interpolate</code>.  The angle
+function behaves no differently than with the core vector template
+classes.  The midpoint and interpolate functions, however, perform a
+linear interpolation on a circle.  This means that the result will
+always have a magnitude of 1.
+</p>
+
+
+<br>
+<h2><a href="Rotation2D.h">Rotation2D</a></h2>
+
+<p>
+When dealing with vectors, an application will frequently need to
+rotate a vector about its origin.  In 2D, this is simply an angle
+of rotation in the plane.  The <code>Rotation2D</code> class obeys
+linear algebra arithmetic, meaning that to rotate a vector, you
+multiply it by a rotation.  For example:
+<code><pre>
+      Unit2D< Length > length(FeetLength(1.1), FeetLength(2.2));
+
+      Rotation2D rotation(DegreesAngle(45));
+
+      Unit2D< Length > rotated = rotation * length;
+</pre></code>
+The result in this case will be a length vector rotated by 45 degrees
+counter-clockwise.  Combining successive rotations can be done by
+multiplication or using the <code>rotate</code> convenience function:
+<code><pre>
+      Rotation2D a(DegreesAngle(20));
+      Rotation2D b(DegreesAngle(30));
+
+      // These are equivalent:
+      Rotation2D c = a * b;
+      Rotation2D c = a.rotate(DegreesAngle(30));
+</pre></code>
+The inverse of a rotation is such that 
+<code>(rotation * rotation.inverse())</code> always yields the identity
+rotation (a rotation of 0 angle).  In other words, if rotating <code>a</code>
+gives <code>b</code>, then rotating <code>b</code> by the inverse will
+give back <code>a</code>.
+</p>
+
+
+<br>
+<h2><a href="Angle2D.h">Unit2D< Angle ></a></h2>
+
+<p>
+A <code>Unit2D< Angle ></code> requires special mention so as to avoid
+confusion.  This represents a 2-dimensional measure of angle in
+<b>cartesian</b> space.  This is a cartesian "flat" angle vector, not
+one on a sphere!  There will be no wrapping around poles.  It is up to
+the application to interpret a 2D angle vector as coordinates on a sphere.
+</p>
+
+
+<br>
+<h2><a href="bugs.html">Known Bugs and Limitations</a></h2>
+
+
+</body>
+</html>

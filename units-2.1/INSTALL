@@ -1,0 +1,21 @@
+#
+# $Id: INSTALL,v 1.3 2003-08-07 06:22:37 knicewar Exp $
+#
+# Copyright Keith Nicewarner.  All rights reserved.
+#
+# Installation instructions for the units of measure library.
+#
+
+On MSVC++ 6.0, open the file msvc/units.dsw and build the DLL 
+(Release configuration is recommended).
+KNOWN ISSUE: test apps don't build due to bugs in the compiler.
+Upgrade to .NET!
+
+NOTE: If you get an internal compiler error building Direction2D.cpp,
+you need to install service pack 5 or greater to fix the compiler
+bug.
+
+With .NET, open the file msvc/units.sln and build all (either
+Debug or Release will work, but only Debug builds the test apps).
+
+On UNIX, cd src and make.  After that, you can optionally make install.

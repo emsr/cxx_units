@@ -1,0 +1,79 @@
+<!--
+#
+# $Id: bugs.html,v 1.1 2001-03-12 03:31:58 knicewar Exp $
+#
+# Copyright Keith Nicewarner.  All rights reserved.
+#
+-->
+
+<html>
+<head>
+<title>Known Bugs and Limitations for units::vector2D</title>
+</head>
+
+<body>
+<h1>Known Bugs and Limitations for <a href="../units.html">units</a>::<a href="vector2D.html">vector2D</a> Class Library</h1>
+
+
+<h2>Compiler Problems</h2>
+
+<h3>Microsoft Visual C++ 5.0</h3>
+
+<ul>
+<li> Does not support default arguments in template functions, so
+a tolerance <b>must</b> be provided for <code>similar</code>.  You
+have the option of using the <code>similarTo</code> member function, 
+which does allow a default tolerance.
+
+<li> Does not support overloading functions which take instantiated
+template arguments.  This means that all "interaction" operators are
+disabled.  For instance, you can't do this:
+<code><pre>
+      Unit2D< Length > length(MetersLength(5),
+                              MetersLength(7));
+
+      // Compute velocity.
+      Unit2D< Speed > velocity = length / SecondsTime(2);
+</pre></code>
+Instead, you must compute the individual components:
+<code><pre>
+      // Compute velocity.
+      Unit2D< Speed > velocity(length.x() / SecondsTime(2),
+                               length.y() / SecondsTime(2));
+</pre></code>
+</ul>
+
+
+<h3>Sun Pro CC 4.2</h3>
+
+<ul>
+<li> Does not support default arguments in template functions, so
+a tolerance <b>must</b> be provided for <code>similar</code>.  You
+have the option of using the <code>similarTo</code> member function, 
+which does allow a default tolerance.
+</ul>
+
+
+<br>
+<h2>Missing Functionality</h2>
+
+<ul>
+<li> There is no way to format "composite" vector units classes with
+a single unit subclass.  For instance, the following is currently
+not supported:
+<code><pre>
+      Unit2D< Speed > speed(KnotsSpeed(200), KnotsSpeed(-200));
+
+      cout << Speed2DFormat< KnotsSpeed >(speed) << endl;  // error
+</pre></code>
+For now, you must do the formatting yourself:
+<code><pre>
+      cout << '('  << (double)KnotsSpeed(speed.x())
+           << ", " << (double)KnotsSpeed(speed.y())
+           << ") " << KnotsSpeed::unitsString << endl;
+</pre></code>
+</ul>
+
+
+</body>
+</html>

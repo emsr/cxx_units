@@ -1,0 +1,45 @@
+#
+# $Id: publish.rules,v 1.2 2001-03-12 03:33:18 knicewar Exp $
+#
+# Copyright Keith Nicewarner.  All rights reserved.
+#
+# Rules for publishing headers, libraries, binaries, etc.
+#
+
+
+publish:: publish.local $(addsuffix .publish, $(SUBDIRS))
+
+
+#
+# Default to root dir.
+#
+ifndef UNITS_PUBLISH_DIR
+UNITS_PUBLISH_DIR = $(UNITS_ROOT)/..
+endif
+
+
+
+$(UNITS_PUBLISH_DIR)/html/$(INSTALL_HTML_DIR)/% \
+$(UNITS_PUBLISH_DIR)/include/$(INSTALL_HEADER_DIR)/% \
+$(UNITS_PUBLISH_DIR)/etc/% \
+$(UNITS_PUBLISH_DIR)/lib/% \
+$(UNITS_PUBLISH_DIR)/bin/%: %
+	@mkdir -p $(subst /.work,,$(@D))
+	@rm -f $(subst /.work,,$(@D))/$(subst .work/,,$*)
+	@ln -s `pwd`/$* $(subst /.work,,$(@D))/$(subst .work/,,$*)
+	@echo Published link for $*
+
+
+publish.local:  publish.html publish.headers publish.data \
+		publish.libraries publish.binaries
+
+
+publish.html:  $(addprefix $(UNITS_PUBLISH_DIR)/html/$(INSTALL_HEADER_DIR)/, $(INSTALL_HTML))
+
+publish.headers:  $(addprefix $(UNITS_PUBLISH_DIR)/include/$(INSTALL_HEADER_DIR)/, $(INSTALL_HEADERS))
+
+publish.data:  $(addprefix $(UNITS_PUBLISH_DIR)/etc/, $(INSTALL_DATA))
+
+publish.libraries:  $(addprefix $(UNITS_PUBLISH_DIR)/lib/, $(INSTALL_LIBRARIES))
+
+publish.binaries:  $(addprefix $(UNITS_PUBLISH_DIR)/bin/, $(INSTALL_BINARIES))

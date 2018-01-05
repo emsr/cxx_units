@@ -1,0 +1,129 @@
+<!--
+#
+# $Id: SignedAngle.html,v 1.1.1.1 2001-03-08 17:08:53 knicewar Exp $
+#
+# Copyright Keith Nicewarner.  All rights reserved.
+#
+-->
+
+<html>
+<head>
+<title>Class ConOps For SignedAngle</title>
+</head>
+
+<body>
+<h1>SignedAngle Class</h1>
+
+
+<h3>Terminology</h3>
+
+<p>None.
+</p>
+
+<h3>ConOps</h3>
+
+<p>Represent the abstract concept of a signed circular angle (values
+wrap around).  The internal 
+representation of the units is inherited from the Angle class.  Most functions 
+are inherited from the Angle class.  Functions to construct, convert to a
+double, and the stream operator are overwritten so that the angle can be
+normalized if needed.  A function providing a self-test is provided.
+A set of common subclasses are provided.
+</p>
+
+<p>Interfaces with this class are shown at the Unit Library Service level.
+</p>
+
+<h3>Implementation Details</h3>
+
+<p>SignedAngle is one class in a set of classes providing basic unit objects 
+needed for a variety of applications.  
+</p>
+
+<p>When a value is assigned to a SignedAngle object, the value is converted 
+into the internal representation units as defined by the Angle class.  When a 
+value is requested from an object, it is converted into the requested units.
+</p>
+
+<p>When a SignedAngle object is converted to a double, the value is
+normalized to be between 0 and 360 degrees or between 0 and 2pi radians,
+depending on the subclass specified.
+</p>
+
+<p>
+A circular angle wraps around; that means
+DegreesAngle(370) == DegreesAngle(10).
+</p>
+
+<p>Subclasses defined are SignedDegreesAngle and SignedRadiansAngle.
+</p>
+
+<h3>Object Scenarios / Test Procedures</h3>
+
+<p>An object of SignedAngle can be declared without a value.  When a value is
+assigned to that object, it must be defined in terms of a subclass to 
+SignedAngle.  When an object of a SignedAngle class is declared and is 
+given a value, that value must be specified in terms of some pre-defined 
+subclass.  This is the only way that the SignedAngle class can know how the 
+number provided should be interpreted.
+</p>
+
+<p>A function is provided to convert a SignedAngle object to a double.  
+This also requires a subclass specification so the caller can be assured of 
+getting the result in an expected way that is not dependent on the internal
+representation.
+</p>
+
+<p>To test this class, simply run the unitsTest.exe program by typing 
+"unitsTest SignedAngle".  The test routine will indicate if the class passed
+it's self-test.
+</p>
+
+<h4>Example Code Snippet</h4>
+
+<code><pre>
+      SignedAngle angle;
+
+      angle = vehicle.bankAngle();
+
+      cout &lt&lt "bank angle = " &lt&lt (double)(SignedDegreesAngle &)angle &lt&lt endl;
+</pre></code>
+
+<h3>Requirements</h3>
+
+<p>Provide comparison operators, as appropriate, to compare to objects of 
+this class.
+</p>
+ 
+<p>Provide arithmetic operators, as appropriate, to add, subtract, multiply, 
+and divide objects of this class.
+</p>
+ 
+<p>Provide operators to interact appropriately with doubles.
+</p>
+ 
+<p>Provide a way to print the value of an object.
+</p>
+
+<p>Provide binary read and write functions.
+</p>
+
+<h3>System Dependencies</h3>
+
+<p>Required classes include:
+</p>
+ 
+<ul>
+<li><a href="./Angle.html">Angle</a>
+    <ul>
+    <li>SignedAngle inherits from Angle.
+   </ul>
+
+<h3>Issues</h3>
+
+<p>None.
+</p>
+
+
+</body>
+</html>

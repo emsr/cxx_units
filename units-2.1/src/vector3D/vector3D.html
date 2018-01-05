@@ -1,0 +1,412 @@
+<!--
+#
+# $Id: vector3D.html,v 1.1 2001-03-13 05:40:01 knicewar Exp $
+#
+# Copyright Keith Nicewarner.  All rights reserved.
+#
+-->
+
+<html>
+<head>
+<title>User Guide for units::vector3D Class Library</title>
+</head>
+
+<body>
+<h1>User Guide for <a href="../units.html">units</a>::vector3D Class Library</h1>
+
+
+<h2>Introduction</h2>
+
+<p>
+This class library builds on the 
+<a href="../scalar/scalar.html">scalar</a> classes.
+It extends some of the scalar units of measure into 3 dimensions.
+A 3D vector in this library has an x, y, and z component in cartesian space.  
+No reference frame is assumed for the vector.  The application 
+is responsible for determining the reference frame, context,
+and validity of any vector.
+</p>
+
+
+<br>
+<h2>Construction</h2>
+
+<h3><a href="Vector3D.h">Vector3D</a></h3>
+
+<p>
+The most basic 3D vector class is the Vector3D template class.  This
+gives the full set of 3D vector operations and ignores the type of
+the template argument, as long as it has arithmetic operators defined.
+For example:
+<code><pre>
+      Vector3D< int >    ivec(1, 2, 3);
+      Vector3D< double > dvec(1.2, 3.4, 5.6);
+      Vector3D< char >   cvec('a', 'b', 'c');  // strange but legal
+</pre></code>
+The components can be accessed or changed using the public data 
+members <code>x</code>, <code>y</code>, and <code>z</code>:
+<code><pre>
+      dvec.x = 2.1;
+      dvec.y = 2 * dvec.x;
+      dvec.z = dvec.x + dvec.y;
+</pre></code>
+</p>
+
+<p>
+A Vector3D does not have explicit units associated with it and is
+therefore as dangerous as using a <code>double</code> with implicit
+units.  The Vector3D template class was provided as a convenience for
+low-level vector algebra applications.
+</p>
+
+<h3><a href="Unit3D.h">Unit3D</a></h3>
+
+<p>
+To construct a 3D vector with units associated with it, use the Unit3D 
+template class.  For example:
+<code><pre>
+      Unit3D< Length > lvec(MetersLength(1), MetersLength(2), MetersLength(3));
+      Unit3D< Speed >  svec(KnotsSpeed(100), KnotsSpeed(200), KnotsSpeed(300));
+</pre></code>
+The components can be accessed or changed using the public member 
+<b>functions</b> <code>x()</code>, <code>y()</code>, and <code>z()</code>:
+<code><pre>
+      lvec.x() = MetersLength(2.1);
+      lvec.y() = 2 * lvec.x();
+      lvec.z() = lvec.x() + lvec.y();
+</pre></code>
+</p>
+
+
+<br>
+<h2>Comparison</h2>
+
+<p>
+Testing for equality can be done in two ways: binary and similar.
+Binary equality is the same as testing <code>double == double</code>.
+This is potentially dangerous because it compares the binary images
+of the two numbers, not their values.  The slightest variation can
+lead to an inequality.  It's up to the application to decide if this
+is the desired behavior.
+</p>
+
+<p>
+More often, the application will wish to test if two vectors are
+"close enough" to each other.  This can be done with the 
+<code>similar</code> function provided with all vector template classes.
+The default tolerance for the <code>Unit3D</code> template class is the 
+default tolerance for the base unit (the template argument).  There is no
+default tolerance for the <code>Vector3D</code> template class; the 
+application must always provide a tolerance.  The tolerance is used
+to test if one vector is within a cube around the other vector.
+The side of the cube is 2 times the tolerance.
+</p>
+
+
+<br>
+<h2>Arithmetic</h2>
+
+<p>
+Once constructed, a 3D vector can be manipulated using linear algebra
+operators.  The application developer should look at 
+<a href="Vector3D.h">Vector3D.h</a> or
+<a href="Unit3D.h">Unit3D.h</a>
+to see the full list of valid operators.  Some examples are:
+<code><pre>
+      Unit3D< Length > a(MetersLength(1), MetersLength(2), MetersLength(3));
+
+      Unit3D< Length > b = 2 * a / 3.4;
+
+      b += a;
+
+      Unit3D< Length > c = (a - 3 * b);
+</pre></code>
+</p>
+
+<p>
+The <code>Vector3D</code> and <code>Unit3D</code> template classes
+share all arithmetic operators, with the exception that <code>Unit3D</code>
+does not have a public dot product or cross product operator because the units
+for these products are squared.  Since <code>Vector3D</code> has no units,
+the products are available:
+<code><pre>
+      Vector3D< double > a(1.1, 2.2, 3.3);
+      Vector3D< double > b(3.3, 2.2, 1.1);
+
+      double             dot   = a * b;  // dot product
+      Vector3D< double > cross = a % b;  // cross product
+</pre></code>
+Remember that in 3D, the cross product is a vector; in 2D, it's
+a scalar.
+</p>
+
+
+<br>
+<h2>Functions</h2>
+
+<p>
+The application developer should look at
+<a href="Vector3D.h">Vector3D.h</a> or
+<a href="Unit3D.h">Unit3D.h</a>
+to see the full list of valid functions.  The functions
+are shared by both <code>Vector3D</code> and <code>Unit3D</code>
+and are fairly straight forward.  The distance functions may be
+a little counter-intuitive for unit vectors other than 
+<code>Unit3D< Length ></code>, but they represent a mathematically
+useful concept.  For instance:
+<code><pre>
+      Unit3D< Speed > a(KnotsSpeed(20), KnotsSpeed(-20), KnotsSpeed(2));
+      Unit3D< Speed > b(KnotsSpeed(22), KnotsSpeed(-15), KnotsSpeed(1));
+
+      Speed c = distance(a, b);
+</pre></code>
+In this case, <code>c</code> can be interpreted as the magnitude of
+the "error" between <code>a</code> and <code>b</code>, with the
+appropriate units.
+</p>
+
+
+<br>
+<h2>Cross-Unit Arithmetic</h2>
+
+<p>
+Some <code>Unit3D</code> classes have arithmetic operators defined so 
+that they can interact with other units.  These interactions are the common
+relationships between units:
+</p>
+
+<center><table>
+<tr><td>Unit3D< Speed >        </td><td> = Unit3D< Length > </td><td> / Time</td></tr>
+<tr><td>Unit3D< Acceleration > </td><td> = Unit3D< Speed >  </td><td> / Time</td></tr>
+<tr><td>Unit3D< Force >        </td><td> = Mass           </td><td> * Unit3D< Acceleration ></td></tr>
+</table></center>
+
+<p>
+These relationships can be rearranged to suit the application.  For 
+instance:
+<code><pre>
+      // Compute velocity.
+      Unit3D< Speed > velocity = Unit3D< Length >(MetersLength(5),
+                                                  MetersLength(7),
+                                                  MetersLength(9)) / SecondsTime(2);
+
+      // Compute position after a duration.
+      Unit3D< Length > position = velocity * SecondsTime(10); 
+</pre></code>
+Note that there is no operator to divide a vector by another vector.
+If we wanted to compute the time to travel to a position given a
+velocity, we'd have to assume that the velocity is in the same
+direction as the position (unless the application wants to do a
+dynamic simulation):
+<code><pre>
+      // Compute time to travel to a position.
+      Time time = velocity.magnitude() / position.magnitude();
+</pre></code>
+</p>
+
+
+<br>
+<h2>Output Formatting</h2>
+
+<p>
+There are times when the application must present a value to the user.
+Since the user needs to see the value in a particular units, the units
+must be specified by the application.  An ostream formatting template
+class is provided for each 3D unit class.  For example, the following 
+prints <code>"(1.1, 2.2, 3.3) ft"</code>:
+<code><pre>
+      Unit3D< Length > length(FeetLength(1.1), FeetLength(2.2), FeetLength(3.3));
+
+      cout << Length3DFormat< FeetLength >(length) << endl;
+</pre></code>
+</p>
+
+<p>
+For some units which can be printed as combinations of other units,
+the format template classes take more than one argument.  For instance, 
+if we wanted to print a speed in miles per minute, we would use the following:
+<code><pre>
+      Unit3D< Speed > speed(KnotsSpeed(200), KnotsSpeed(-200), KnotsSpeed(2));
+
+      cout << Speed3DFormat< StatuteMilesLength,
+                             MinutesTime >(speed) << endl;
+</pre></code>
+</p>
+
+
+<br>
+<h2>Unit Conversion</h2>
+
+<p>
+Hopefully, applications won't need to explicitly convert 
+<code>Unit3D</code> vectors between units, but as we saw in the
+<a href="../../scalar/src/scalar.html">scalar</a> library, it can
+sometimes become necessary.  In these circumstances, you can use
+the format template classes, which provide a <code>vector()</code>
+operator:
+<code><pre>
+      const double factor = 1.234;  // N / m
+
+      Unit3D< Length > length(FeetLength(1.1), FeetLength(2.2), FeetLength(3.3));
+
+      Vector3D< double > newtons = Length3DFormat< MetersLength >(length).vector();
+
+      Unit3D< Force > force(NewtonsForce(newtons.x),
+                            NewtonsForce(newtons.y),
+                            NewtonsForce(newtons.z));
+</pre></code>
+Note that we <b>could</b> have used
+<code><pre>
+      Unit3D< NewtonsForce > force(newtons.x,
+                                   newtons.y,
+                                   newtons.z);
+</pre></code>
+But this is dangerous because the compiler will not know how to promote
+a <code>Unit3D< NewtonsForce ></code> to a <code>Unit3D< Force ></code>,
+which may cause problems.  <b>Always use the base unit class for 
+<code>Unit3D</code> instantiations.</b>
+</p>
+
+
+<br>
+<h2><a href="Direction3D.h">Direction3D</a></h2>
+
+<p>
+When talking about a vector, we typically refer to its magnitude and
+direction.  Since the magnitude is a scalar value, it already can be
+represented.  But the direction requires a new class:
+<code>Direction3D</code>.  This is a special kind of vector whose
+magnitude is always 1.  Because of this, you can't scale or add
+directions.  You can, however, negate and use the product operators.
+</p>
+
+<p>
+A <code>Direction3D</code> can be constructed by either using the
+<code>direction()</code> operator, or by giving vector components.
+For example:
+<code><pre>
+      Unit3D< Length > length(FeetLength(1.1), FeetLength(2.2), FeetLength(3.3));
+
+      Direction3D length_d = length.direction();
+
+      Direction3D dir(1, 2, 3);
+</pre></code>
+The direction vector is always normalized, so you don't have to worry
+about making sure the components have a magnitude of 1.  A direction
+can be used to construct a unit of measure vector by multiplying
+with a magnitude:
+<code><pre>
+      Unit3D< Length > length = FeetLength(10) * Direction3D(1, 2, 3);
+</pre></code>
+Because a direction can never have a 0 length, an exception will
+be thrown if you ever attempt to directly or indirectly create
+a direction with a magnitude of 0.
+</p>
+
+<p>
+There are only 3 basic functions that can be performed on a direction
+besides the arithmetic operators: <code>angle</code>,
+<code>midpoint</code>, and <code>interpolate</code>.  The angle
+function behaves no differently than with the core vector template
+classes.  The midpoint and interpolate functions, however, perform a
+linear interpolation on a sphere.  This means that the result will
+always have a magnitude of 1.
+</p>
+
+
+<br>
+<h2><a href="Rotation3D.h">Rotation3D</a></h2>
+
+<p>
+When dealing with vectors, an application will frequently need to
+rotate a vector about its origin.  In 3D, this is an angle of rotation 
+about an arbitrary axis.  There are many ways to represent a 3D rotation: 
+Euler angles, cosine matrix, equivalent angle-axis, unit quaterion, etc.
+Two methods are computationally useful: unit quaternion and cosine matrix.
+These are represented by the two subclasses of <code>Rotation3D</code>:
+<code>QuaternionRotation3D</code> and <code>MatrixRotation3D</code>.
+Both have their strong-points and weak-points:
+<ul>
+<li>Both are non-degenerate at the poles.
+<li>Both have pretty much constant accuracy over the range
+of possible rotations.
+<li>Unit quaternions are easier to normalize.
+<li>Unit quaternions have fewer computations for combining rotations.
+<li>Cosine matrices have fewer computations for transforming vectors.
+</ul>
+It's up to the application developer to determine which representation
+to use.  If your application does a lot of coordinate system manipulation,
+then <code>QuaternionRotation3D</code> might be the best choice.  If your
+application does a lot of vector transformations, then 
+<code>MatrixRotation3D</code> might be best.  You might even use both
+and keep them synchronized (this is common in graphics applications).
+</p>
+
+<p>
+Regardless of the subclass you choose for the implementation, the 
+<code>Rotation3D</code> class obeys linear algebra arithmetic, meaning 
+that to rotate a vector, you multiply it by a rotation.  For example:
+<code><pre>
+      Unit3D< Length > length(FeetLength(1.1), FeetLength(2.2), FeetLength(3.3));
+
+      QuaternionRotation3D quaternion(Direction3D(1, 1, 1), DegreesAngle(45));
+      MatrixRotation3D     matrix    (Direction3D(1, 1, 1), DegreesAngle(45));
+
+      // These are equivalent:
+      Unit3D< Length > rotated = quaternion * length;
+      Unit3D< Length > rotated = matrix     * length;
+</pre></code>
+The result in this case will be a length vector rotated by 45 degrees
+counter-clockwise about the axis (1, 1, 1).  Combining successive 
+rotations can be done by multiplication or using the <code>rotate</code> 
+convenience function:
+<code><pre>
+      MatrixRotation3D a(Direction3D(1,  1, 1), DegreesAngle(20));
+      MatrixRotation3D b(Direction3D(1, -2, 3), DegreesAngle(30));
+
+      // These are equivalent:
+      MatrixRotation3D c = a * b;
+      MatrixRotation3D c = a.rotate(DegreesAngle(30));
+</pre></code>
+Note that rotation multiplication can only be done at the subclass level.
+This is because the abstract <code>Rotation3D</code> class doesn't know
+which type to instantiate.  However, the <code>rotate</code> is virtual,
+meaning you <b>can</b> use it with an abstract <code>Rotation3D</code>.
+</p>
+
+<p>
+The inverse of a rotation is such that 
+<code>(rotation * rotation.inverse())</code> always yields the identity 
+rotation (a rotation of 0 angle).  In other words, if rotating <code>a</code>
+gives <code>b</code>, then rotating <code>b</code> by the inverse will
+give back <code>a</code>.  Note that as with multiplication, 
+<code>inverse()</code> can only be done at the subclass level.
+Because <code>invert()</code> is virtual, it can be used with an abstract 
+<code>Rotation3D</code>.
+</p>
+
+
+<br>
+<h2><a href="AngularSpeed3D.h">Unit3D< AngularSpeed ></a></h2>
+
+<p>
+A <code>Unit3D< AngularSpeed ></code> requires special mention so as to avoid
+confusion.  This represents a 3-dimensional measure of angular speed, which
+is probably only useful for representing a rotation vector (used in
+dynamic simulations).
+Adding a RotationRate class would exceed the scope of this library,
+which is to strictly represent units of measure with no interpretation
+imposed on them.  But this class is still needs to be provided in
+addition to an application-defined RotationRate class because it needs special
+visibility to compute things like the magnitude.
+A 2-dimensional measure of AngularSpeed doesn't make any sense, so
+this is the only vector class with AngularSpeed.
+</p>
+
+
+<br>
+<h2><a href="bugs.html">Known Bugs and Limitations</a></h2>
+
+
+</body>
+</html>

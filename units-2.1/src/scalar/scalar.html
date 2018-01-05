@@ -1,0 +1,457 @@
+<!--
+#
+# $Id: scalar.html,v 1.1.1.1 2001-03-08 17:08:53 knicewar Exp $
+#
+# Copyright Keith Nicewarner.  All rights reserved.
+#
+-->
+
+<html>
+<head>
+<title>User Guide for units::scalar Class Library</title>
+</head>
+
+<body>
+<h1>User Guide for <a href="../units.html">units</a>::scalar Class Library</h1>
+
+
+<h2>Introduction</h2>
+
+<p>
+A scalar is a one-dimensional real number that represents a single
+measured value, such as length, time, or mass.  No reference is
+assumed for the measured value, and a negative measured value is just
+as valid as a positive one.  The application determines the context of
+the measurement and the validity of it.
+</p>
+
+<p>
+Typically, software is written with implicit units for measurements.
+That is, a double or float variable is declared and assigned a number
+which is implied to be in a particular unit of measure.  For example:
+<code><pre>
+      double length = 5;  // meters
+</pre></code>
+
+This practice can be very dangerous because unit mismatches cannot be
+detected at compile time.  For instance, if a function is declared to
+take a length in feet, we could accidentally pass it meters and not
+be aware of the error until run-time.  Even worse, we could just as
+easily pass a completely different unit of measure.  For instance, we
+could pass 10 seconds to a function expecting a length in meters.
+</p>
+
+<p>
+The basic idea of the scalar class library is to abstract the idea of a unit
+of measure so that C++ code can be written without the pitfalls of
+implicit units.  By declaring base classes for all the common types of
+measure and subclasses for common units for each of these types, we can
+use the compiler to detect unit mismatches.  The strong type checking
+of C++ makes it much more difficult (but not impossible) to accidentally
+mix units.
+</p>
+
+
+<br>
+<h2>Construction</h2>
+
+<p>
+Great effort was taken to minimize the overhead associated with using
+the scalar classes.  Since operating on measured values is much more
+common than construction and initialization, all scalar classes are
+designed to have a fixed internal representation.  This internal
+representation is hidden from the application so that it can change
+without affecting anything else.  Because of this, a scalar class takes 
+up the same memory as a double value.
+</p>
+
+<p>
+Units must be specified with any value assigned to a measurement variable.
+For example,
+<code><pre>
+      Length length = 5;                 // error
+      Length length = MetersLength(5);   // OK
+</pre></code>
+
+Default constructors are provided for abstract unit types so that a value
+can be assigned later.  The default value is undefined (just as with a
+double) because assuming a default would introduce unwarrented overhead.
+Example:
+<code><pre>
+      Length length;
+
+      length = MetersLength(5);
+</pre></code>
+</p>
+
+<p>
+Once a unit of measure is created, it's identity will prevent it from
+being used when a function is expecting different units.  For example:
+<code><pre>
+      extern void doSomething(Length &length);
+
+      doSomething(SecondsTime(5));    // error
+      doSomething(MetersLength(5));   // OK
+      doSomething(FeetLength(5));     // OK
+</pre></code>
+</p>
+
+<p>
+You should not be concerned about construction overhead associated with
+constant values.  For instance:
+<code><pre>
+      if (angle < DegreesAngle(45))
+      {
+      }
+</pre></code>
+Some application programmers might be concerned that the 
+<code>DegreesAngle</code>
+constructor will incur unwanted conversion overhead every time this test 
+is performed.  They will instead attempt to use the internal units 
+to avoid the conversion:
+<code><pre>
+      if (angle < RadiansAngle(0.78539816))
+      {
+      }
+</pre></code>
+For one thing, this is a dangerous assumption since the internal 
+representation is hidden and could potentially change.  Further, since 
+most people don't think in radians, this makes the code difficult
+to read and understand.  The first method should be used without
+concern because most compilers will optimize constant arithmetic
+out so no overhead is incurred at run-time.
+</p>
+
+
+<br>
+<h2>Comparison</h2>
+
+<p>
+Testing for equality can be done in two ways: binary and similar.
+Binary equality is the same as testing <code>double == double</code>.
+This is potentially dangerous because it compares the binary images
+of the two numbers, not their values.  The slightest variation can
+lead to an inequality.  It's up to the application to decide if this
+is the desired behavior.
+</p>
+
+<p>
+More often, the application will wish to test if two measurements are
+"close enough" to each other.  This can be done with the 
+<code>similar</code> function provided with all unit classes.
+Each unit class has a default tolerance for determining how close
+two values need to be to be considered similar.  The value of the
+default tolerance can be accessed via a const data member.  For example:
+<code><pre>
+      if (similar(MetersLength(2), MetersLength(3)))
+      {
+         // This will never be true.
+      }
+
+      if (similar(MetersLength(2), MetersLength(2.5), MetersLength(1)))
+      {
+         // This is true.
+      }
+
+      // Test for similarity with much tighter tolerance than default.
+      if (similar(a, b, MetersLength::defaultTolerance * 0.1))
+      {
+      }
+</pre></code>
+</p>
+
+<p>
+Inequality operators are provided for all base unit types.  You can mix
+subclasses of the same base to make things readable.  For example:
+<code><pre>
+      if (MetersLength(1) > FeetLength(1))
+      {
+         // This is true.
+      }
+      if (SecondsTime(1) < HoursTime(1))
+      {
+         // This is true.
+      }
+</pre></code>
+Inequality operators do not use tolerances.
+</p>
+
+
+<br>
+<h2>Arithmetic</h2>
+
+<p>
+Once a unit of measure has been constructed, it can be manipulated in many
+ways just like a double variable.  The application developer should look
+at the appropriate header file to see the full list of valid operators.
+Some examples are:
+<code><pre>
+      Length a = MetersLength(5);
+
+      Length b = 2 * a / 3.4;
+
+      b += 1.2;
+
+      Length c = (a - b);
+</pre></code>
+Note that the unit type is preserved in arithmetic.  That means you can mix
+different units of the same type:
+<code><pre>
+      Length a = (MetersLength(5) + FeetLength(2));   // OK
+      Length a = (MetersLength(5) + SecondsTime(2));  // error
+</pre></code>
+Most units will cancel themselves by division.  In other words, the
+ratio of two Lengths is a double:
+<code><pre>
+      Length a = MetersLength(5);
+      Length b = MetersLength(5);
+
+      double ratio = a/b;
+</pre></code>
+</p>
+
+
+<br>
+<h2>Cross-Unit Arithmetic</h2>
+
+<p>
+Some unit classes have arithmetic operators defined so that they
+can interact with other units.  These interactions are the common
+relationships between units:
+</p>
+
+<center><table>
+<tr><td>Speed        </td><td> = Length </td><td> / Time</td></tr>
+<tr><td>Acceleration </td><td> = Speed  </td><td> / Time</td></tr>
+<tr><td>Force        </td><td> = Mass   </td><td> * Acceleration</td></tr>
+<tr><td>AngularSpeed </td><td> = Angle  </td><td> / Time</td></tr>
+<tr><td>Length       </td><td> = Angle  </td><td> * Length</td></tr>
+<tr><td>Area         </td><td> = Length </td><td> * Length</td></tr>
+<tr><td>Volume       </td><td> = Area   </td><td> * Length</td></tr>
+<tr><td>Density      </td><td> = Mass   </td><td> / Volume</td></tr>
+<tr><td>MassFlowRate </td><td> = Mass   </td><td> / Time</td></tr>
+<tr><td>Frequency    </td><td> = double </td><td> / Time</td></tr>
+<tr><td>Pressure     </td><td> = Force  </td><td> / Area</td></tr>
+</table></center>
+
+<p>
+These relationships can be rearranged to suit the application.  For 
+instance:
+<code><pre>
+      // Compute speed.
+      Speed speed = MetersLength(5) / SecondsTime(2);
+
+      // Compute distance traveled after a duration.
+      Length distance = speed * SecondsTime(10); 
+
+      // Compute time to travel a distance.
+      Time time = speed / FeetLength(23);
+</pre></code>
+</p>
+
+
+<br>
+<h2>Unit Conversion</h2>
+
+<p>
+Because the internal representation is fixed, conversion between
+units take place in the constructor.  Most applications should then
+deal only with the abstract types.  However, there are times when an
+application must get a double representing the current value.  For 
+instance, if an equation cannot easily be converted to use the
+abstract types, the measurement must be converted to the units the
+equation was expecting.
+</p>
+
+<p>
+For example, the Standard Atmosphere model
+uses the equation:
+<code><pre>
+      static const double thermalLapseRate = 0.006506986;  // deg C / meter
+
+      static const Temperature seaLevelTemperature = CelsiusTemperature(15.0);
+
+      Temperature computeTemperature(const Length &mslAltitude)
+      {
+         return (seaLevelTemperature -
+                 thermalLapseRate * mslAltitude);
+      }
+</pre></code>
+
+This won't compile because you can't subtract a Length from a Temperature.
+Since there is no unit class defined for Temperature divided by
+Length, the application must specify the units to be used for the
+multiplication.  Fortunately, there is a double cast operator defined
+for all unit subclasses.  This can be used any time the units are known:
+<code><pre>
+      double meters = (double)MetersLength(5);
+</pre></code>
+
+But what about when you only have an abstract measurement?  That's when
+you must convert the measurement into the desired units.
+</p>
+
+<p>
+There are two ways of converting a unit of measure: using the copy
+constructor and typecasting a reference.  For example, the previous
+example should have been written like this:
+<code><pre>
+      Temperature computeTemperature(const Length &mslAltitude)
+      {
+         return (seaLevelTemperature -
+                 CelsiusTemperature(thermalLapseRate *
+                                    (double)(MetersLength &)mslAltitude);
+      }
+</pre></code>
+
+Typecasting can only work if you have a reference to a non-temporary
+object.  Trying to typecast the result of a function or operation will
+usually fail to compile.  In these cases, you should use the copy
+constructor.
+</p>
+
+
+<br>
+<h2>Output Formatting</h2>
+
+<p>
+There are times when the application must present a value to the user.
+Since the user needs to see the value in a particular units, the units
+must be specified by the application.  An ostream operator is provided 
+for all subclasses which prints the value followed by the units 
+abbreviation.  For example, the following prints <code>"2.3 ft"</code>:
+<code><pre>
+      cout << FeetLength(2.3) << endl;
+</pre></code>
+</p>
+
+<p>
+For some unit types, there are additional formats which are not available
+as subclasses.  For instance, <code>Speed</code> has several common 
+combinations of <code>Length</code> and <code>Time</code> types, but 
+certainly not all of them.  In these cases, you can use the format
+template classes.  For instance, if we wanted to print a speed in
+miles per minute, we would use the following:
+<code><pre>
+      Speed speed = KnotsSpeed(400);
+      cout << SpeedFormat< StatuteMilesLength,
+                           MinutesTime >(speed) << endl;
+</pre></code>
+</p>
+
+<p>
+Note that the following will print slightly different things:
+<code><pre>
+      Speed speed = KnotsSpeed(400);
+      cout << SpeedFormat< NauticalMilesLength,
+                           HoursTime >(speed) << endl;
+
+      Speed speed = KnotsSpeed(400);
+      cout << (KnotsSpeed &)speed << endl;
+</pre></code>
+
+The first will print <code>"400 nm/hr"</code>, while the second will
+print <code>"400 kts"</code>.
+</p>
+
+<p>
+The format template classes also provide a double cast operator which
+allows the application to get the value in whatever units are required.
+</p>
+
+
+<br>
+<h2>Special Types</h2>
+
+<p>
+While most of the unit types are fairly straight-forward in usage,
+there are a few notable types which warrent special consideration:
+Temperature and Angle.
+</p>
+
+<h3><a href="Temperature.h">Temperature</a></h3>
+
+<p>
+Since temperature unit conversions involve an additive offset (for
+instance, Kelvin = Celsius + 273), the following arithmetic operations are
+not defined for the abstract class: scaling, negation, and ratio.  Doubling
+a Kelvin value gives quite a different temperature than doubling a Celsius
+value!  You must specify which units to be operated on and then convert
+back to the desired units.  For instance:
+<code><pre>
+      Temperature a = CelsiusTemperature(23);
+      Temperature b = a*2;  // error
+      Temperature b = CelsiusTemperature((double)(CelsiusTemperature &)a)*2);
+</pre></code>
+</p>
+
+<h3><a href="Angle.h">Angle</a></h3>
+
+<p>
+Mathematically, there are two types of angles: flat and circular.
+A flat angle can have any value and has no concept of wrapping around.
+In other words, with a flat angle, 0 != 360 degrees.  This is useful
+in representing how far a shaft has rotated, for instance.  The
+<code>Angle</code> class is a flat angle and gives unconstrained
+representation of a measure of angle.
+</p>
+
+<p>
+A circular angle is one where values wrap around; 0 == 360 degrees.
+There are two popular references for circular angles: one that goes
+from -180 to 180 degrees and one that goes from 0 to 360 degrees.
+These are the <code><a href="SignedAngle.h">SignedAngle</a></code> and 
+<code><a href="UnsignedAngle.h">UnsignedAngle</a></code>
+classes, respectively.  Both will wrap when testing for similarity.
+For instance:
+<code><pre>
+      if (similar(SignedDegreesAngle( 179),
+                  SignedDegreesAngle(-179), DegreesAngle(3))
+      {
+         // This is true.
+      }
+      if (similar(UnsignedDegreesAngle(  1),
+                  UnsignedDegreesAngle(359), DegreesAngle(3))
+      {
+         // This is true.
+      }
+</pre></code>
+Subtracting two circular angles will always return the smallest angle 
+between the two angles.  For instance:
+<code><pre>
+      (SignedDegreesAngle(-170) -
+       SignedDegreesAngle( 170)   == DegreesAngle( 20)
+
+      (SignedDegreesAngle( 170) -
+       SignedDegreesAngle(-170))  == DegreesAngle(-20)
+
+      (UnsignedDegreesAngle( 10) -
+       UnsignedDegreesAngle(350)   == DegreesAngle( 20)
+
+      (UnsignedDegreesAngle(350) -
+       UnsignedDegreesAngle( 10)   == DegreesAngle(-20)
+</pre></code>
+</p>
+
+<p>
+All angle classes can be used with trig functions.  For instance:
+<code><pre>
+      cos(DegreesAngle( 90)) ==  0
+      sin(DegreesAngle(-90)) == -1
+      tan(DegreesAngle( 45)) ==  1
+</pre></code>
+All angle classes can be multiplied by a <code>Length</code> radius to get
+the arc-length:
+<code><pre>
+      DegreesAngle(90) * MetersLength(1)
+</pre></code>
+</p>
+
+<br>
+<hr>
+
+<h2><a href="unitList.html">List of Currently Supported Units</a></h2>
+
+
+</body>
+</html>

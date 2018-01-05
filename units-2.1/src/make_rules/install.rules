@@ -1,0 +1,46 @@
+#
+# $Id: install.rules,v 1.2 2001-03-12 03:33:18 knicewar Exp $
+#
+# Copyright Keith Nicewarner.  All rights reserved.
+#
+# Rules for installing headers, libraries, binaries, etc.
+#
+
+
+install:: install.local $(addsuffix .install, $(SUBDIRS))
+
+install.dir:
+	@if [ "$$UNITS_INSTALL_DIR" = "" ]; then \
+		echo "***"; \
+		echo "*** Env variable UNITS_INSTALL_DIR must be defined."; \
+		echo "***"; \
+		exit 1; \
+	fi
+
+$(UNITS_INSTALL_DIR)/html/$(INSTALL_HTML_DIR)/% \
+$(UNITS_INSTALL_DIR)/include/$(INSTALL_HEADER_DIR)/% \
+$(UNITS_INSTALL_DIR)/etc/% \
+$(UNITS_INSTALL_DIR)/lib/%: %
+	@install -d $(subst /.work,,$(@D))
+ifeq ($(shell uname -s), SunOS)
+	install -m 664 -f $(subst /.work,,$(@D)) $*
+else
+	install -m 664 $* $(subst /.work,,$(@D))
+endif
+
+
+$(UNITS_INSTALL_DIR)/bin/%: %
+	@install -d $(@D)
+ifeq ($(shell uname -s), SunOS)
+	install -m 775 -f $(@D) $*
+else
+	install -m 775 $* $(@D)
+endif
+
+
+install.local: install.dir \
+	$(addprefix $(UNITS_INSTALL_DIR)/html/$(INSTALL_HTML_DIR)/, $(INSTALL_HTML)) \
+	$(addprefix $(UNITS_INSTALL_DIR)/include/$(INSTALL_HEADER_DIR)/, $(INSTALL_HEADERS)) \
+	$(addprefix $(UNITS_INSTALL_DIR)/etc/, $(INSTALL_DATA)) \
+	$(addprefix $(UNITS_INSTALL_DIR)/lib/, $(INSTALL_LIBRARIES)) \
+	$(addprefix $(UNITS_INSTALL_DIR)/bin/, $(INSTALL_BINARIES))

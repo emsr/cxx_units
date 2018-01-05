@@ -1,0 +1,32 @@
+
+	The Units of Measure Library
+	Copyright (C) 2001  Keith Nicewarner
+
+The units library consists of classes and utilities for representing
+and manipulating measurements.  There are three class categories in
+the units library: scalar, 2D vector, and 3D vector.  These groups
+represent 1, 2, and 3 dimensional measurements, respectively.  By
+providing these classes, it is hoped that application developers can
+be relieved of the burden of internal units representation.  The
+classes allow the C++ compiler to use typing information to check for
+unit mismatch errors instead of waiting until run-time for the errors
+to pop up.  This frees the application developer to focus safely on
+the problem at hand and less on the details of how units are
+represented.
+
+This library is free software; you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as
+published by the Free Software Foundation; either version 2.1 of the
+License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library (see the file COPYING in this
+directory); if not, write to the Free Software Foundation, Inc., 59
+Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+Keith Nicewarner

@@ -1,0 +1,105 @@
+<!--
+#
+# $Id: Acceleration2D.html,v 1.1 2001-03-12 03:31:53 knicewar Exp $
+#
+# Copyright Keith Nicewarner.  All rights reserved.
+#
+-->
+
+<html>
+<head>
+<title>Class ConOps For Acceleration2D</title>
+</head>
+
+<body>
+<h1>Acceleration2D Class</h1>
+
+
+<h3>Terminology</h3>
+
+<p>None.
+</p>
+
+<h3>ConOps</h3>
+
+<p>Represent the abstract concept of a 2-dimensional acceleration in cartesian
+space.  The internal representation is made up of 2 Acceleration class variables, 
+X & Y.  Functions include comparison and arithmetic operators.  A function is
+provided to determine the magnitude of a object of Acceleration2D.  Functions are
+provided to determine between two Acceleration2D objects a midpoint, interpolate, 
+distance, and angle.  Functions provided to read and
+write an acceleration object in binary format.  A function providing a self-test is 
+provided.
+</p>
+
+<p>Interfaces with this class are shown at the Unit Library Service level.
+</p>
+
+<h3>Implementation Details</h3>
+
+<p>Acceleration2D is one class in a set of classes providing basic unit objects 
+needed for a variety of applications.  
+</p>
+
+<h3>Object Scenarios / Test Procedures</h3>
+
+<p>An object of Acceleration2D can be declared without a value.  When a value is
+assigned to that object, it must be defined in terms of either a set of 2
+Acceleration values or another Acceleration2D object.
+</p>
+
+<p>To test this class, simply run the unitsTest.exe program by typing 
+"unitsTest Acceleration2D".  The test routine will indicate if the class passed it's
+self-test.
+</p>
+
+<h4>Example Code Snippet</h4>
+
+<code><pre>
+      Acceleration2D accelerationVector = (MetersSecondAcceleration(1),
+                                           MetersSecondAcceleration(1));
+
+      Acceleration   acceleration = accelerationVector.magnitude();
+
+      cout &lt&lt "acceleration = " &lt&lt acceleration &lt&lt endl;
+</pre></code>
+
+<h3>Requirements</h3>
+
+<p>Provide comparison operators, as appropriate, to compare to objects of
+this class.
+</p>
+ 
+<p>Provide arithmetic operators, as appropriate, to add, subtract, multiply,
+and divide objects of this class.
+</p>
+ 
+<p>Provide operators to interact appropriately with doubles.
+</p>
+
+<p>Provide a way to print the value of an object.
+</p>
+
+<p>Provide binary read and write functions.
+</p>
+
+<h3>System Dependencies</h3>
+
+<p>Required classes include:
+</p>
+ 
+<ul>
+<li><a href="./Acceleration.html">Acceleration</a>
+    <ul>
+    <li>Acceleration is used in Acceleration2D functions.
+   </ul>
+
+
+<h3>Issues</h3>
+
+<p>None.
+</p>
+
+
+</body>
+</html>
