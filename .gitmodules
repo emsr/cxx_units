@@ -1,0 +1,3 @@
+[submodule "units_literals"]
+	path = boost_units_literals
+	url = https://github.com/acecil/units_literals.git
