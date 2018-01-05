@@ -1,5 +1,6 @@
-
-// $HOME/bin/bin/g++ -std=c++14 -o bel bel.cpp
+/*
+$HOME/bin/bin/g++ -std=c++14 -o bel bel.cpp
+*/
 
 #include <iostream>
 #include <iomanip>

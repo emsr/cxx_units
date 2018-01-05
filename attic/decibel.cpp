@@ -1,5 +1,6 @@
-
-// $HOME/bin/bin/g++ -std=c++14 -o decibel decibel.cpp
+/*
+$HOME/bin/bin/g++ -std=c++14 -o decibel decibel.cpp
+*/
 
 #include <iostream>
 #include <iomanip>

@@ -1,4 +1,6 @@
-//  ./bin/bin/g++ -std=c++0x -o units2 units2.cpp
+/*
+$HOME/bin/bin/g++ -std=c++14 -o units2 units2.cpp
+*/
 
 #include <iostream>
 
